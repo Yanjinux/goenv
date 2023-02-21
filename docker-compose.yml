@@ -6,38 +6,48 @@ networks:
 
 # 服务容器配置
 services:
-  golang:                                # 自定义容器名称
-    build:
-      context: ./golang                  # 指定构建使用的 Dockerfile 文件
-    environment:                         # 设置环境变量
-      - TZ=${TZ}
-    volumes:                             # 设置挂载目录
-      - ${CODE_PATH_HOST}:/usr/src/code  # 引用 .env 配置中 CODE_PATH_HOST 变量，将宿主机上代码存放的目录挂载到容器中 /usr/src/code 目录
-    ports:                               # 设置端口映射
-      - "8000:8000"
-      - "8001:8001"
-      - "8002:8002"
-      - "8003:8003"
-      - "9000:9000"
-      - "9001:9001"
-      - "9002:9002"
-      - "9003:9003"
-    stdin_open: true                     # 打开标准输入，可以接受外部输入
-    tty: true
-    networks:
-      - backend
-    restart: always                      # 指定容器退出后的重启策略为始终重启
-
-  etcd:                                  # 自定义容器名称
-    build:
-      context: ./etcd                    # 指定构建使用的 Dockerfile 文件
-    environment:
-      - TZ=${TZ}
-      - ALLOW_NONE_AUTHENTICATION=yes
-    ports:                               # 设置端口映射
-      - "${ETCD_PORT}:2379"
-    networks:
-      - backend
-    restart: always
+redis:
+  image: redis:6.2.6
+  container_name: redis
+  restart: always
+  volumes:
+    - ${DATA_PATH_HOST}/redis/data:/data
+    - ${DATA_PATH_HOST}/redis/redis.conf:/etc/redis/redis.conf:ro
+    - ${DATA_PATH_HOST}/redis/logs:/logs
+  command: redis-server /etc/redis/redis.conf
+  ports:
+    - ${REDIS_MANAGE_CONNECT_PORT}:6379
+mysql:
+  image: mysql:8.0.31
+  #指定容器名称
+  container_name: mysql8031
+  #restart: always
+  #指定服务运行的端口
+  ports :
+   - ${MYSQL_PORT}:3306
+  #指定容器的环境变量
+  environment:
+   #数据库root密码的密码root
+   - MYSQL_ROOT_PASSWORD=root
+   #创建的库
+   - MYSQL_DATABASE=test_demo
+   #允许多IP连接数据库
+   - MYSQL_ROOT_HOST=%
+  #挂载数据卷
+  volumes:
+   - ${DATA_PATH_HOST}/mysql/conf/my.cnf:/etc/mysql/my.cnf
+   - ${DATA_PATH_HOST}/mysql/data:/var/lib/mysql
+   - ${DATA_PATH_HOST}/mysql/logs:/var/log/mysql
+  command: ['--server-id=1',
+              '--sync_binlog=1',
+              '--log-bin=mysql8-bin',
+              '--binlog-ignore-db=mysql,information_schema,performance_schema,sys',
+              '--binlog_cache_size=256M',
+              '--binlog_format=mixed',
+              '--relay_log=mysql8-relay',
+              '--lower_case_table_names=1',
+              '--character-set-server=utf8mb4',
+              '--collation-server=utf8mb4_general_ci',
+              '--sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION']
 
   
