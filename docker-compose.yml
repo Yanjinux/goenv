@@ -6,48 +6,48 @@ networks:
 
 # 服务容器配置
 services:
-redis:
-  image: redis:6.2.6
-  container_name: redis
-  restart: always
-  volumes:
-    - ${DATA_PATH_HOST}/redis/data:/data
-    - ${DATA_PATH_HOST}/redis/redis.conf:/etc/redis/redis.conf:ro
-    - ${DATA_PATH_HOST}/redis/logs:/logs
-  command: redis-server /etc/redis/redis.conf
-  ports:
-    - ${REDIS_MANAGE_CONNECT_PORT}:6379
-mysql:
-  image: mysql:8.0.31
-  #指定容器名称
-  container_name: mysql8031
-  #restart: always
-  #指定服务运行的端口
-  ports :
-   - ${MYSQL_PORT}:3306
-  #指定容器的环境变量
-  environment:
-   #数据库root密码的密码root
-   - MYSQL_ROOT_PASSWORD=root
-   #创建的库
-   - MYSQL_DATABASE=test_demo
-   #允许多IP连接数据库
-   - MYSQL_ROOT_HOST=%
-  #挂载数据卷
-  volumes:
-   - ${DATA_PATH_HOST}/mysql/conf/my.cnf:/etc/mysql/my.cnf
-   - ${DATA_PATH_HOST}/mysql/data:/var/lib/mysql
-   - ${DATA_PATH_HOST}/mysql/logs:/var/log/mysql
-  command: ['--server-id=1',
-              '--sync_binlog=1',
-              '--log-bin=mysql8-bin',
-              '--binlog-ignore-db=mysql,information_schema,performance_schema,sys',
-              '--binlog_cache_size=256M',
-              '--binlog_format=mixed',
-              '--relay_log=mysql8-relay',
-              '--lower_case_table_names=1',
-              '--character-set-server=utf8mb4',
-              '--collation-server=utf8mb4_general_ci',
-              '--sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION']
+  redis:
+    image: redis:6.2.6
+    container_name: redis
+    restart: always
+    volumes:
+      - ${DATA_PATH_HOST}/redis/data:/data
+      - ${DATA_PATH_HOST}/redis/redis.conf:/etc/redis/redis.conf:ro
+      - ${DATA_PATH_HOST}/redis/logs:/logs
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - ${REDIS_MANAGE_CONNECT_PORT}:6379
+  mysql:
+    image: mysql:8.0.31
+    #指定容器名称
+    container_name: mysql8031
+    #restart: always
+    #指定服务运行的端口
+    ports :
+    - ${MYSQL_PORT}:3306
+    #指定容器的环境变量
+    environment:
+    #数据库root密码的密码root
+    - MYSQL_ROOT_PASSWORD=root
+    #创建的库
+    - MYSQL_DATABASE=test_demo
+    #允许多IP连接数据库
+    - MYSQL_ROOT_HOST=%
+    #挂载数据卷
+    volumes:
+    - ${DATA_PATH_HOST}/mysql/conf/my.cnf:/etc/mysql/my.cnf
+    - ${DATA_PATH_HOST}/mysql/data:/var/lib/mysql
+    - ${DATA_PATH_HOST}/mysql/logs:/var/log/mysql
+    command: ['--server-id=1',
+                '--sync_binlog=1',
+                '--log-bin=mysql8-bin',
+                '--binlog-ignore-db=mysql,information_schema,performance_schema,sys',
+                '--binlog_cache_size=256M',
+                '--binlog_format=mixed',
+                '--relay_log=mysql8-relay',
+                '--lower_case_table_names=1',
+                '--character-set-server=utf8mb4',
+                '--collation-server=utf8mb4_general_ci',
+                '--sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION']
 
   
