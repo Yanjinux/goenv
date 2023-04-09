@@ -27,6 +27,7 @@ RUN GOPROXY=https://goproxy.cn/,direct go install github.com/zeromicro/go-zero/t
     go install github.com/golang/protobuf/protoc-gen-go@latest && \
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
     apt-get clean && \
+    mkdir -p /usr/src/code && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     rm /var/log/lastlog /var/log/faillog
 
