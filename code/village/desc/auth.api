@@ -1,0 +1,22 @@
+syntax = "v1"
+
+type (
+	VerifyTokenReq {
+	}
+	VerifyTokenResp {
+		UserId int64 `json:"userId"`
+		Ok     bool  `json:"ok"`
+	}
+)
+
+@server(
+	group: verify
+	prefix: identity/v1
+)
+
+service village {
+	
+	@doc "验证认证请求token"
+	@handler token
+	get /verify/token (VerifyTokenReq) returns (VerifyTokenResp)
+}

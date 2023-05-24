@@ -1,0 +1,81 @@
+syntax = "v1"
+
+
+ 
+
+type User {
+	Id       int64  `json:"id"`
+	Mobile   string `json:"mobile"`
+	Nickname string `json:"nickname"`
+	Sex      int64  `json:"sex"`
+	Avatar   string `json:"avatar"`
+	Info     string `json:"info"`
+}
+
+type (
+	RegisterReq {
+		Mobile   string `json:"mobile"`
+		Password string `json:"password"`
+	}
+	RegisterResp {
+		AccessToken  string `json:"accessToken"`
+		AccessExpire int64  `json:"accessExpire"`
+		RefreshAfter int64  `json:"refreshAfter"`
+	}
+)
+
+type (
+	LoginReq {
+		Mobile   string `json:"mobile"`
+		Password string `json:"password"`
+	}
+	LoginResp {
+		AccessToken  string `json:"accessToken"`
+		AccessExpire int64  `json:"accessExpire"`
+		RefreshAfter int64  `json:"refreshAfter"`
+	}
+)
+
+type (
+	WXMiniAuthReq {
+		Code          string `json:"code"`
+		IV            string `json:"iv"`
+		EncryptedData string `json:"encryptedData"`
+	}
+	WXMiniAuthResp {
+		AccessToken  string `json:"accessToken"`
+		AccessExpire int64  `json:"accessExpire"`
+		RefreshAfter int64  `json:"refreshAfter"`
+	}
+)
+
+type (
+	UserInfoReq {
+	}
+	UserInfoResp {
+		UserInfo User `json:"userInfo"`
+	}
+)
+
+@server(
+    group: user 
+    prefix: user/v1
+)
+service village {
+	
+	@doc "注册"
+	@handler register
+	post /user/register (RegisterReq) returns (RegisterResp)
+	
+	@doc "登陆"
+	@handler login
+	post /user/login (LoginReq) returns (LoginResp)
+	
+	@doc "获取用户信息"
+	@handler detail
+	post /user/detail (UserInfoReq) returns (UserInfoResp)
+	
+	@doc "微信小程序授权"
+	@handler wxMiniAuth
+	post /user/wxMiniAuth (WXMiniAuthReq) returns (WXMiniAuthResp)
+}

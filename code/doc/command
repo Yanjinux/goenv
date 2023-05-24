@@ -1,0 +1,4 @@
+ goctl model mysql ddl -src usercenter.sql -dir .  
+  goctl model mysql ddl -src usercenter.sql -dir .  -c //添加缓存
+  goctl rpc protoc user.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+  goctl api go -api desc.api -dir ../  -style=goZero
