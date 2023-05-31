@@ -20,6 +20,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: verify.TokenHandler(serverCtx),
 			},
 		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/identity/v1"),
 	)
 
@@ -37,15 +38,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/user/detail",
-				Handler: user.DetailHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
 				Path:    "/user/wxMiniAuth",
 				Handler: user.WxMiniAuthHandler(serverCtx),
 			},
 		},
+		rest.WithPrefix("/user/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/detail",
+				Handler: user.DetailHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/user/v1"),
 	)
 }

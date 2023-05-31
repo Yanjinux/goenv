@@ -103,8 +103,10 @@ func (m *defaultUserModel) FindOneByMobile(ctx context.Context, mobile string) (
 }
 
 func (m *defaultUserModel) Insert(ctx context.Context, data *User) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?)", m.table, userRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.DeleteTime, data.DelState, data.Mobile, data.Password, data.Nickname, data.Sex, data.Avatar, data.Info)
+
+	query := fmt.Sprintf("insert into %s (`mobile`,`nickname`,`password`,`sex`,`avatar`,`info`,`create_time`) values ( ?, ? , ?, ?,?,?,?)", m.table)
+
+ 	ret, err := m.conn.ExecCtx(ctx, query,  data.Mobile,data.Nickname, data.Password,  data.Sex, data.Avatar, data.Info,time.Now())
 	return ret, err
 }
 

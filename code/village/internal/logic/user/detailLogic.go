@@ -2,7 +2,7 @@
  * @Author: Yanjinux 471573617@qq.com
  * @Date: 2023-05-18 01:01:52
  * @LastEditors: Yanjinux 471573617@qq.com
- * @LastEditTime: 2023-05-25 02:13:00
+ * @LastEditTime: 2023-05-30 01:25:02
  * @FilePath: \code\village\internal\logic\user\detailLogic.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -11,6 +11,7 @@ package user
 import (
 	"context"
 
+	"fmt"
 	"village/village/internal/svc"
 	"village/village/internal/types"
 
@@ -33,7 +34,7 @@ func NewDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DetailLogi
 
 func (l *DetailLogic) Detail(req *types.UserInfoReq) (resp *types.UserInfoResp, err error) {
 	userId := GetUidFromCtx(l.ctx)
-
+	fmt.Println("userID:", userId)
 	userInfo, err := l.svcCtx.UserModel.FindOne(l.ctx, userId)
 	if err != nil {
 		return nil, err

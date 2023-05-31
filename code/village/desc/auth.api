@@ -10,6 +10,7 @@ type (
 )
 
 @server(
+	jwt: Auth
 	group: verify
 	prefix: identity/v1
 )

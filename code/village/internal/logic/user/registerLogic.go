@@ -2,7 +2,7 @@
  * @Author: Yanjinux 471573617@qq.com
  * @Date: 2023-05-18 01:01:52
  * @LastEditors: Yanjinux 471573617@qq.com
- * @LastEditTime: 2023-05-25 01:47:43
+ * @LastEditTime: 2023-05-31 00:27:00
  * @FilePath: \goenv\code\village\internal\logic\user\registerLogic.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -10,14 +10,18 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"village/village/internal/svc"
 	"village/village/internal/types"
 
+	"village/village/common/ctxData"
 	"village/village/common/tool"
 	"village/village/common/xerr"
+
 	"village/village/model"
 
 	"github.com/golang-jwt/jwt"
@@ -25,16 +29,12 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-const CacheUserTokenKey = "user_token:%d"
-
 var ErrGenerateTokenError = xerr.NewErrMsg("生成token失败")
 var ErrUserAlreadyRegisterError = errors.New("该用户已被注册")
 
-// 从ctx获取uid
-var CtxKeyJwtUserId = "jwtUserId"
-
 func GetUidFromCtx(ctx context.Context) int64 {
-	uid, _ := ctx.Value(CtxKeyJwtUserId).(int64)
+	uid, err := strconv.ParseInt(string(ctx.Value(ctxData.CtxKeyJwtUserId).(json.Number)), 10, 64)
+	fmt.Printf("Get UID %v %t", err, ctx.Value(ctxData.CtxKeyJwtUserId))
 	return uid
 }
 
@@ -53,19 +53,13 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 func (l *RegisterLogic) Register(in *types.RegisterReq) (resp *types.RegisterResp, err error) {
-	fmt.Println("1")
 	user, err := l.svcCtx.UserModel.FindOneByMobile(l.ctx, in.Mobile)
 	if err != nil && err != model.ErrNotFound {
-		fmt.Println(err)
-
 		return nil, errors.Wrapf(xerr.NewErrCode(xerr.DB_ERROR), "mobile:%s,err:%v", in.Mobile, err)
 	}
 	if user != nil {
-		fmt.Println("3")
-
-		return nil, errors.Wrapf(ErrUserAlreadyRegisterError, "用户已经存在 mobile:%s,err:%v", in.Mobile, err)
+		return nil, ErrUserAlreadyRegisterError
 	}
-	fmt.Println("2")
 
 	user = new(model.User)
 	user.Mobile = in.Mobile
@@ -79,7 +73,6 @@ func (l *RegisterLogic) Register(in *types.RegisterReq) (resp *types.RegisterRes
 	if err != nil {
 		return nil, errors.Wrapf(xerr.NewErrCode(xerr.DB_ERROR), "err:%v,user:%+v", err, user)
 	}
-	fmt.Println("3")
 
 	userId, err := insertResult.LastInsertId()
 	if err != nil {
@@ -87,8 +80,6 @@ func (l *RegisterLogic) Register(in *types.RegisterReq) (resp *types.RegisterRes
 	}
 
 	if err != nil {
-		fmt.Println("5")
-
 		return nil, err
 	}
 
@@ -105,19 +96,19 @@ func (l *RegisterLogic) Register(in *types.RegisterReq) (resp *types.RegisterRes
 func GenerateToken(ctx *svc.ServiceContext, useID int64) (*types.RegisterResp, error) {
 
 	now := time.Now().Unix()
-	accessExpire := ctx.Config.JwtAuth.AccessExpire
-	accessToken, err := getJwtToken(ctx.Config.JwtAuth.AccessSecret, now, accessExpire, useID)
+	accessExpire := ctx.Config.Auth.AccessExpire
+	accessToken, err := getJwtToken(ctx.Config.Auth.AccessSecret, now, accessExpire, useID)
 	if err != nil {
 		return nil, errors.Wrapf(ErrGenerateTokenError, "getJwtToken err userId:%d , err:%v", useID, err)
 	}
 
-	// 存入redis.
-	userTokenKey := fmt.Sprintf(CacheUserTokenKey, useID)
-	err = ctx.RedisClient.Setex(userTokenKey, accessToken, int(accessExpire))
-	if err != nil {
-		return nil, errors.Wrapf(ErrGenerateTokenError, "SetnxEx err userId:%d, err:%v", useID, err)
-	}
-
+	/*
+		userTokenKey := fmt.Sprintf(ctxData.CacheUserTokenKey, useID)
+		err = ctx.RedisClient.Setex(userTokenKey, accessToken, int(accessExpire))
+		if err != nil {
+			return nil, errors.Wrapf(ErrGenerateTokenError, "SetnxEx err userId:%d, err:%v", useID, err)
+		}
+	*/
 	return &types.RegisterResp{
 		AccessToken:  accessToken,
 		AccessExpire: now + accessExpire,
@@ -131,7 +122,7 @@ func getJwtToken(secretKey string, iat, seconds, userId int64) (string, error) {
 	claims := make(jwt.MapClaims)
 	claims["exp"] = iat + seconds
 	claims["iat"] = iat
-	claims[CtxKeyJwtUserId] = userId
+	claims[ctxData.CtxKeyJwtUserId] = userId
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims = claims
 	return token.SignedString([]byte(secretKey))

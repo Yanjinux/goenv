@@ -58,7 +58,7 @@ type (
 )
 
 @server(
-    group: user 
+     group: user 
     prefix: user/v1
 )
 service village {
@@ -70,12 +70,22 @@ service village {
 	@doc "登陆"
 	@handler login
 	post /user/login (LoginReq) returns (LoginResp)
-	
+
+	@doc "微信小程序授权"
+	@handler wxMiniAuth
+	post /user/wxMiniAuth (WXMiniAuthReq) returns (WXMiniAuthResp)
+}	
+
+@server(
+	jwt: Auth
+    group: user 
+    prefix: user/v1
+)
+service village {
+ 
 	@doc "获取用户信息"
 	@handler detail
 	post /user/detail (UserInfoReq) returns (UserInfoResp)
 	
-	@doc "微信小程序授权"
-	@handler wxMiniAuth
-	post /user/wxMiniAuth (WXMiniAuthReq) returns (WXMiniAuthResp)
+	 
 }
