@@ -9,6 +9,7 @@
 package svc
 
 import (
+	"fmt"
 	"village/village/internal/config"
 	"village/village/model"
 
@@ -23,7 +24,10 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	rdi, _ := redis.NewRedis(c.Redis)
+	rdi, err := redis.NewRedis(c.Redis)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return &ServiceContext{
 		Config:      c,
 		UserModel:   model.NewUserModel(sqlx.NewMysql(c.DB.DataSource)),

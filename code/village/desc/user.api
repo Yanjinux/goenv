@@ -16,6 +16,7 @@ type (
 	RegisterReq {
 		Mobile   string `json:"mobile"`
 		Password string `json:"password"`
+		Token string `json:"token"`
 	}
 	RegisterResp {
 		AccessToken  string `json:"accessToken"`
@@ -57,12 +58,23 @@ type (
 	}
 )
 
+type (
+	UserSmsVerifyReq {
+		Mobile string `json:"mobile"` 
+	}
+	UserSmsVerifyResp {
+		Code uint32    `json:"code"`
+		Desc string `json:"desc"`
+	}
+)
 @server(
      group: user 
     prefix: user/v1
 )
 service village {
-	
+	@doc "获取短信token"
+	@handler mobile
+	post /user/verify/mobile (UserSmsVerifyReq) returns (UserSmsVerifyResp)
 	@doc "注册"
 	@handler register
 	post /user/register (RegisterReq) returns (RegisterResp)

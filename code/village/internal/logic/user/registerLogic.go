@@ -2,7 +2,7 @@
  * @Author: Yanjinux 471573617@qq.com
  * @Date: 2023-05-18 01:01:52
  * @LastEditors: Yanjinux 471573617@qq.com
- * @LastEditTime: 2023-05-31 00:27:00
+ * @LastEditTime: 2023-06-10 00:14:10
  * @FilePath: \goenv\code\village\internal\logic\user\registerLogic.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -51,7 +51,17 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 		svcCtx: svcCtx,
 	}
 }
+func (l *RegisterLogic) checkVerifyToken(mobile, token string) bool {
+	rt, err := l.svcCtx.RedisClient.Get(fmt.Sprintf(ctxData.MobileRegistTokenKey, mobile))
+	if err != nil {
+		fmt.Println(rt, "|", token)
 
+		l.Logger.Errorf("get mobile token fail %v", err)
+		return false
+	}
+	fmt.Println(rt, "|", token)
+	return rt == token
+}
 func (l *RegisterLogic) Register(in *types.RegisterReq) (resp *types.RegisterResp, err error) {
 	user, err := l.svcCtx.UserModel.FindOneByMobile(l.ctx, in.Mobile)
 	if err != nil && err != model.ErrNotFound {
@@ -61,6 +71,10 @@ func (l *RegisterLogic) Register(in *types.RegisterReq) (resp *types.RegisterRes
 		return nil, ErrUserAlreadyRegisterError
 	}
 
+	// 校验验证码
+	if !l.checkVerifyToken(in.Mobile, in.Token) {
+		return nil, xerr.NewErrMsg("校验失败")
+	}
 	user = new(model.User)
 	user.Mobile = in.Mobile
 	if len(user.Nickname) == 0 {
@@ -102,13 +116,6 @@ func GenerateToken(ctx *svc.ServiceContext, useID int64) (*types.RegisterResp, e
 		return nil, errors.Wrapf(ErrGenerateTokenError, "getJwtToken err userId:%d , err:%v", useID, err)
 	}
 
-	/*
-		userTokenKey := fmt.Sprintf(ctxData.CacheUserTokenKey, useID)
-		err = ctx.RedisClient.Setex(userTokenKey, accessToken, int(accessExpire))
-		if err != nil {
-			return nil, errors.Wrapf(ErrGenerateTokenError, "SetnxEx err userId:%d, err:%v", useID, err)
-		}
-	*/
 	return &types.RegisterResp{
 		AccessToken:  accessToken,
 		AccessExpire: now + accessExpire,

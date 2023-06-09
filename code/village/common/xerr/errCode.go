@@ -2,7 +2,7 @@
  * @Author: Yanjinux 471573617@qq.com
  * @Date: 2023-05-19 00:38:24
  * @LastEditors: Yanjinux 471573617@qq.com
- * @LastEditTime: 2023-05-19 00:38:34
+ * @LastEditTime: 2023-06-09 23:36:39
  * @FilePath: \code\village\common\xerr\errCode.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -21,3 +21,4 @@ const TOKEN_GENERATE_ERROR uint32 = 100004
 const DB_ERROR uint32 = 100005
 
 //用户模块
+const MSG_SEND_FREQUENCE uint32 = 200001 // 短息发送频繁

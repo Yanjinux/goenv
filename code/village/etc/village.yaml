@@ -9,3 +9,9 @@ DB:
 Auth:
   AccessSecret: de0536f9-6450-4606-8e13-5a19ed505ea0
   AccessExpire: 31536000
+
+ 
+Redis:
+  Host: redis:6379
+  Type: node
+ 

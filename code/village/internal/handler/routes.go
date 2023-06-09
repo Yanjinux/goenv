@@ -28,6 +28,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
+				Path:    "/user/verify/mobile",
+				Handler: user.MobileHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/user/register",
 				Handler: user.RegisterHandler(serverCtx),
 			},

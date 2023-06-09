@@ -21,6 +21,7 @@ type User struct {
 type RegisterReq struct {
 	Mobile   string `json:"mobile"`
 	Password string `json:"password"`
+	Token    string `json:"token"`
 }
 
 type RegisterResp struct {
@@ -57,4 +58,13 @@ type UserInfoReq struct {
 
 type UserInfoResp struct {
 	UserInfo User `json:"userInfo"`
+}
+
+type UserSmsVerifyReq struct {
+	Mobile string `json:"mobile"`
+}
+
+type UserSmsVerifyResp struct {
+	Code uint32 `json:"code"`
+	Desc string `json:"desc"`
 }
